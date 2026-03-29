@@ -41,6 +41,7 @@ The web interface is hosted on **GitHub Pages**.
 1.  **Navigate** through the sidebar to access different modules (Dashboard, Patients, etc.).
 2.  **Register a Patient** first to enable appointment booking and billing.
 3.  **Use Quick Actions** on the Dashboard for the most common tasks.
+4.  **User Link** https://ashutoshsinghabc232104-jpg.github.io/Hospital-Management-System/
 
 ### CLI Version
 1.  Run the Python script.
