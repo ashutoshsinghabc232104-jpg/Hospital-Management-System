@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedCore — Hospital Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:       #1a1a1a;
+  --ink-2:     #4a4a4a;
+  --ink-3:     #8a8a8a;
+  --ink-4:     #c4c4c4;
+  --paper:     #fafaf8;
+  --paper-2:   #f2f2ef;
+  --paper-3:   #e8e8e4;
+  --rule:      #deded9;
+  --red:       #c0392b;
+  --red-dim:   #f7eeec;
+  --blue:      #1a4a7a;
+  --blue-dim:  #eaf0f7;
+  --green:     #1d6a3a;
+  --green-dim: #eaf4ee;
+  --amber:     #7a5a1a;
+  --amber-dim: #fdf6ec;
+  --sidebar:   240px;
+  --top:       56px;
+  --mono:      'IBM Plex Mono', monospace;
+  --sans:      'IBM Plex Sans', sans-serif;
+  --serif:     'Playfair Display', Georgia, serif;
+}
+ 
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+ 
+body {
+  font-family: var(--sans);
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+ 
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rule); }
+ 
+/* HEADER */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--top);
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  z-index: 300;
+}
+ 
+.wordmark {
+  font-family: var(--serif);
+  font-size: 1.15rem;
+  color: var(--paper);
+  font-weight: 400;
+  letter-spacing: .01em;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+ 
+.wordmark-div {
+  display: inline-block;
+  width: 1px;
+  height: 16px;
+  background: #444;
+  margin: 0 16px;
+  vertical-align: middle;
+}
+ 
+.wordmark-sub {
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: #666;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  font-weight: 400;
+}
+ 
+.header-date {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: .68rem;
+  color: #555;
+  letter-spacing: .05em;
+}
+ 
+/* LAYOUT */
+.shell {
+  display: flex;
+  padding-top: var(--top);
+  min-height: 100vh;
+}
+ 
+/* SIDEBAR */
+nav {
+  width: var(--sidebar);
+  position: fixed;
+  top: var(--top); bottom: 0; left: 0;
+  background: var(--paper-2);
+  border-right: 1px solid var(--rule);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0 32px;
+}
+ 
+.nav-section { margin-bottom: 8px; }
+ 
+.nav-heading {
+  font-family: var(--mono);
+  font-size: .58rem;
+  font-weight: 500;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  padding: 0 20px;
+  margin: 22px 0 4px;
+}
+ 
+.nav-heading:first-child { margin-top: 0; }
+ 
+.nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 8px 20px;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  font-family: var(--sans);
+  font-size: .875rem;
+  font-weight: 400;
+  color: var(--ink-2);
+  cursor: pointer;
+  text-align: left;
+  transition: color .12s, background .12s, border-color .12s;
+}
+ 
+.nav-btn:hover { color: var(--ink); background: var(--paper-3); }
+ 
+.nav-btn.active {
+  color: var(--ink);
+  font-weight: 600;
+  border-left-color: var(--red);
+  background: var(--paper);
+}
+ 
+.nav-ct {
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: var(--ink-4);
+  background: var(--paper-3);
+  padding: 1px 6px;
+  border-radius: 2px;
+}
+ 
+.nav-btn.active .nav-ct {
+  background: var(--red-dim);
+  color: var(--red);
+}
+ 
+/* MAIN */
+main {
+  margin-left: var(--sidebar);
+  flex: 1;
+  padding: 52px 56px;
+  max-width: calc(var(--sidebar) + 860px);
+}
+ 
+.page { display: none; }
+.page.active {
+  display: block;
+  animation: rise .18s ease;
+}
+ 
+@keyframes rise {
+  from { opacity: 0; transform: translateY(5px); }
+  to   { opacity: 1; transform: none; }
+}
+ 
+/* PAGE HEADER */
+.ph {
+  padding-bottom: 20px;
+  margin-bottom: 36px;
+  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+ 
+.ph h1 {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 400;
+  color: var(--ink);
+  letter-spacing: -.02em;
+  line-height: 1;
+}
+ 
+.ph p {
+  margin-top: 5px;
+  font-size: .78rem;
+  color: var(--ink-3);
+  letter-spacing: .01em;
+}
+ 
+/* STATS */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 36px;
+}
+ 
+.stat {
+  padding: 24px 28px;
+  border-right: 1px solid var(--rule);
+  background: var(--paper);
+}
+ 
+.stat:last-child { border-right: none; }
+ 
+.stat-lbl {
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 10px;
+}
+ 
+.stat-n {
+  font-family: var(--serif);
+  font-size: 2.8rem;
+  font-weight: 400;
+  line-height: 1;
+  color: var(--ink);
+  letter-spacing: -.02em;
+}
+ 
+.stat-sub {
+  font-size: .7rem;
+  color: var(--ink-4);
+  margin-top: 6px;
+  font-family: var(--mono);
+}
+ 
+/* QUICK ACTIONS */
+.qa-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+ 
+.qa {
+  background: var(--paper);
+  padding: 22px 24px;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+  font-family: var(--sans);
+  transition: background .1s;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+ 
+.qa:hover { background: var(--paper-2); }
+ 
+.qa-name { font-size: .9rem; font-weight: 600; color: var(--ink); }
+.qa-desc { font-size: .75rem; color: var(--ink-3); }
+.qa-cta  { margin-top: 16px; font-family: var(--mono); font-size: .65rem; color: var(--ink-4); letter-spacing: .04em; }
+ 
+/* TWO COL */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+ 
+/* SECTION */
+.sec-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+ 
+.sec-label {
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+ 
+/* TABLE */
+.tw { overflow-x: auto; }
+ 
+table { width: 100%; border-collapse: collapse; font-size: .875rem; }
+ 
+thead th {
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 500;
+  padding: 0 14px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+ 
+tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--rule);
+  color: var(--ink-2);
+  vertical-align: middle;
+}
+ 
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--paper-2); }
+td strong { color: var(--ink); font-weight: 500; }
+ 
+/* CHIP */
+.chip {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: .62rem;
+  padding: 3px 7px;
+  border-radius: 2px;
+  letter-spacing: .03em;
+}
+ 
+.chip-mono   { background: var(--paper-2); color: var(--ink-2); border: 1px solid var(--rule); }
+.chip-blue   { background: var(--blue-dim);  color: var(--blue); }
+.chip-red    { background: var(--red-dim);   color: var(--red); }
+.chip-green  { background: var(--green-dim); color: var(--green); }
+.chip-amber  { background: var(--amber-dim); color: var(--amber); }
+ 
+/* FORM */
+.form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px 28px;
+  margin-bottom: 28px;
+}
+ 
+.fg { display: flex; flex-direction: column; gap: 7px; }
+.fg.full { grid-column: 1 / -1; }
+ 
+.fg label {
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+ 
+.fg label em { color: var(--red); font-style: normal; margin-left: 2px; }
+ 
+.fg input, .fg select {
+  font-family: var(--sans);
+  font-size: .9rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color .12s, box-shadow .12s;
+  width: 100%;
+  appearance: none;
+}
+ 
+.fg select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8a8a'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 30px;
+  cursor: pointer;
+}
+ 
+.fg input:focus, .fg select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(26,74,122,.08);
+}
+ 
+.fg input::placeholder { color: var(--ink-4); }
+ 
+.form-note {
+  font-size: .78rem;
+  color: var(--ink-3);
+  line-height: 1.7;
+  border-left: 2px solid var(--rule);
+  padding: 2px 12px;
+  margin-bottom: 26px;
+}
+ 
+hr.rule { border: none; border-top: 1px solid var(--rule); margin: 24px 0; }
+ 
+/* BUTTONS */
+.btn {
+  font-family: var(--sans);
+  font-size: .82rem;
+  font-weight: 600;
+  padding: 9px 20px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: opacity .12s, transform .1s;
+  letter-spacing: .01em;
+  line-height: 1;
+}
+ 
+.btn:hover { opacity: .86; transform: translateY(-1px); }
+.btn:active { transform: none; opacity: 1; }
+ 
+.btn-dark  { background: var(--ink); color: var(--paper); }
+.btn-red   { background: var(--red); color: #fff; }
+ 
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+}
+.btn-ghost:hover { background: var(--paper-3); opacity: 1; }
+ 
+.btn-sm { padding: 5px 13px; font-size: .74rem; }
+ 
+/* ACTIVITY */
+.feed-item {
+  display: grid;
+  grid-template-columns: 6px 1fr auto;
+  align-items: start;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule);
+}
+ 
+.feed-item:last-child { border-bottom: none; }
+ 
+.feed-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+ 
+.feed-text { font-size: .82rem; color: var(--ink-2); line-height: 1.5; }
+.feed-text strong { color: var(--ink); font-weight: 500; }
+ 
+.feed-time {
+  font-family: var(--mono);
+  font-size: .62rem;
+  color: var(--ink-4);
+  white-space: nowrap;
+  margin-top: 2px;
+}
+ 
+/* EMPTY */
+.empty {
+  padding: 48px 20px;
+  text-align: center;
+}
+ 
+.empty-dash {
+  width: 24px;
+  height: 1px;
+  background: var(--rule);
+  margin: 0 auto 16px;
+}
+ 
+.empty h3 {
+  font-family: var(--serif);
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--ink-2);
+  margin-bottom: 5px;
+}
+ 
+.empty p {
+  font-size: .76rem;
+  color: var(--ink-3);
+  line-height: 1.6;
+  max-width: 220px;
+  margin: 0 auto;
+}
+ 
+/* TOAST */
+#toasts {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+ 
+.toast {
+  font-family: var(--sans);
+  font-size: .82rem;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 11px 16px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.25);
+  transform: translateX(110%);
+  opacity: 0;
+  transition: transform .26s cubic-bezier(.22,1,.36,1), opacity .18s;
+  pointer-events: auto;
+  max-width: 320px;
+}
+ 
+.toast.in { transform: none; opacity: 1; }
+ 
+.toast-bar { width: 2px; height: 16px; border-radius: 1px; flex-shrink: 0; }
+ 
+@media (max-width: 860px) {
+  nav { width: 52px; }
+  .nav-heading, .nav-btn span:not(.nav-ct), .nav-ct { display: none; }
+  .nav-btn { justify-content: center; border-left: none; }
+  .nav-btn.active { background: var(--paper-3); }
+  main { margin-left: 52px; padding: 28px 20px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .form { grid-template-columns: 1fr; }
+  .two-col { grid-template-columns: 1fr; }
+  .qa-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+ 
+<header>
+  <a class="wordmark" href="#" onclick="showPage('dashboard');return false;">
+    MedCore
+    <span class="wordmark-div"></span>
+    <span class="wordmark-sub">Hospital Management</span>
+  </a>
+  <div class="header-date" id="hdate"></div>
+</header>
+ 
+<div class="shell">
+  <nav>
+    <div class="nav-section">
+      <div class="nav-heading">Overview</div>
+      <button class="nav-btn active" data-page="dashboard" onclick="showPage('dashboard')">
+        <span>Dashboard</span>
+      </button>
+    </div>
+ 
+    <div class="nav-section">
+      <div class="nav-heading">Patients</div>
+      <button class="nav-btn" data-page="add-patient" onclick="showPage('add-patient')">
+        <span>Register Patient</span>
+      </button>
+      <button class="nav-btn" data-page="view-patients" onclick="showPage('view-patients')">
+        <span>Patient Registry</span>
+        <span class="nav-ct" id="nb-p">0</span>
+      </button>
+    </div>
+ 
+    <div class="nav-section">
+      <div class="nav-heading">Appointments</div>
+      <button class="nav-btn" data-page="book-appt" onclick="showPage('book-appt')">
+        <span>Book Appointment</span>
+      </button>
+      <button class="nav-btn" data-page="view-appts" onclick="showPage('view-appts')">
+        <span>All Appointments</span>
+        <span class="nav-ct" id="nb-a">0</span>
+      </button>
+    </div>
+ 
+    <div class="nav-section">
+      <div class="nav-heading">Billing</div>
+      <button class="nav-btn" data-page="gen-bill" onclick="showPage('gen-bill')">
+        <span>Generate Bill</span>
+      </button>
+      <button class="nav-btn" data-page="view-bills" onclick="showPage('view-bills')">
+        <span>Bill Records</span>
+        <span class="nav-ct" id="nb-b">0</span>
+      </button>
+    </div>
+  </nav>
+ 
+  <main>
+ 
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="ph">
+        <div>
+          <h1>Dashboard</h1>
+          <p>System overview</p>
+        </div>
+      </div>
+ 
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-lbl">Patients</div>
+          <div class="stat-n" id="s-patients">0</div>
+          <div class="stat-sub">registered</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Appointments</div>
+          <div class="stat-n" id="s-appts">0</div>
+          <div class="stat-sub">scheduled</div>
+        </div>
+        <div class="stat">
+          <div class="stat-lbl">Revenue</div>
+          <div class="stat-n" id="s-rev">₹0</div>
+          <div class="stat-sub">total billed</div>
+        </div>
+      </div>
+ 
+      <div class="qa-grid">
+        <button class="qa" onclick="showPage('add-patient')">
+          <div class="qa-name">Register Patient</div>
+          <div class="qa-desc">Add a new patient to the system</div>
+          <div class="qa-cta">Register &rarr;</div>
+        </button>
+        <button class="qa" onclick="showPage('book-appt')">
+          <div class="qa-name">Book Appointment</div>
+          <div class="qa-desc">Schedule a visit for a patient</div>
+          <div class="qa-cta">Book &rarr;</div>
+        </button>
+        <button class="qa" onclick="showPage('gen-bill')">
+          <div class="qa-name">Generate Bill</div>
+          <div class="qa-desc">Create a billing record</div>
+          <div class="qa-cta">Bill &rarr;</div>
+        </button>
+      </div>
+ 
+      <div class="two-col">
+        <div>
+          <div class="sec-head">
+            <span class="sec-label">Recent Patients</span>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('view-patients')">View all</button>
+          </div>
+          <div id="d-recent"></div>
+        </div>
+        <div>
+          <div class="sec-head">
+            <span class="sec-label">Activity</span>
+          </div>
+          <div id="d-activity"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- REGISTER PATIENT -->
+    <div class="page" id="page-add-patient">
+      <div class="ph">
+        <div>
+          <h1>Register Patient</h1>
+          <p>Add a new patient to the hospital system</p>
+        </div>
+      </div>
+      <div class="form-note">
+        All fields marked with an asterisk are required. A patient ID will be assigned automatically upon submission.
+      </div>
+      <div class="form">
+        <div class="fg">
+          <label>Full Name <em>*</em></label>
+          <input type="text" id="p-name" placeholder="e.g. Arjun Sharma" autocomplete="off">
+        </div>
+        <div class="fg">
+          <label>Age <em>*</em></label>
+          <input type="number" id="p-age" placeholder="34" min="0" max="150">
+        </div>
+        <div class="fg full">
+          <label>Diagnosis / Presenting Condition <em>*</em></label>
+          <input type="text" id="p-disease" placeholder="e.g. Hypertension, Type 2 Diabetes">
+        </div>
+      </div>
+      <hr class="rule">
+      <button class="btn btn-dark" onclick="addPatient()">Register Patient</button>
+    </div>
+ 
+    <!-- PATIENT REGISTRY -->
+    <div class="page" id="page-view-patients">
+      <div class="ph">
+        <div>
+          <h1>Patient Registry</h1>
+          <p>All registered patients</p>
+        </div>
+        <button class="btn btn-dark" onclick="showPage('add-patient')">Register Patient</button>
+      </div>
+      <div class="tw" id="t-patients"></div>
+    </div>
+ 
+    <!-- BOOK APPOINTMENT -->
+    <div class="page" id="page-book-appt">
+      <div class="ph">
+        <div>
+          <h1>Book Appointment</h1>
+          <p>Schedule a visit for a registered patient</p>
+        </div>
+      </div>
+      <div class="form">
+        <div class="fg">
+          <label>Patient <em>*</em></label>
+          <select id="a-patient"><option value="">Select a patient</option></select>
+        </div>
+        <div class="fg">
+          <label>Date <em>*</em></label>
+          <input type="date" id="a-date">
+        </div>
+      </div>
+      <hr class="rule">
+      <button class="btn btn-dark" onclick="bookAppointment()">Confirm Appointment</button>
+    </div>
+ 
+    <!-- ALL APPOINTMENTS -->
+    <div class="page" id="page-view-appts">
+      <div class="ph">
+        <div>
+          <h1>All Appointments</h1>
+          <p>Scheduled patient visits</p>
+        </div>
+        <button class="btn btn-dark" onclick="showPage('book-appt')">Book Appointment</button>
+      </div>
+      <div class="tw" id="t-appts"></div>
+    </div>
+ 
+    <!-- GENERATE BILL -->
+    <div class="page" id="page-gen-bill">
+      <div class="ph">
+        <div>
+          <h1>Generate Bill</h1>
+          <p>Create a billing record for a patient</p>
+        </div>
+      </div>
+      <div class="form">
+        <div class="fg">
+          <label>Patient <em>*</em></label>
+          <select id="b-patient"><option value="">Select a patient</option></select>
+        </div>
+        <div class="fg">
+          <label>Amount (&#x20B9;) <em>*</em></label>
+          <input type="number" id="b-amount" placeholder="5000" min="0">
+        </div>
+      </div>
+      <hr class="rule">
+      <button class="btn btn-red" onclick="generateBill()">Generate Bill</button>
+    </div>
+ 
+    <!-- BILL RECORDS -->
+    <div class="page" id="page-view-bills">
+      <div class="ph">
+        <div>
+          <h1>Bill Records</h1>
+          <p>All billing entries</p>
+        </div>
+        <button class="btn btn-dark" onclick="showPage('gen-bill')">Generate Bill</button>
+      </div>
+      <div class="tw" id="t-bills"></div>
+    </div>
+ 
+  </main>
+</div>
+ 
+<div id="toasts"></div>
+ 
+<script>
+let patients     = [];
+let appointments = [];
+let bills        = [];
+let activity     = [];
+ 
+(function init() {
+  const now = new Date();
+  document.getElementById('hdate').textContent =
+    now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  renderDash();
+})();
+ 
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-btn[data-page="' + id + '"]').forEach(b => b.classList.add('active'));
+  if (id === 'view-patients') renderPatients();
+  if (id === 'view-appts')    renderAppts();
+  if (id === 'view-bills')    renderBills();
+  if (id === 'book-appt')     fillSelect('a-patient');
+  if (id === 'gen-bill')      fillSelect('b-patient');
+  if (id === 'dashboard')     renderDash();
+}
+ 
+function showToast(msg, color) {
+  const c  = document.getElementById('toasts');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.innerHTML = `<div class="toast-bar" style="background:${color}"></div><span>${msg}</span>`;
+  c.appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('in')));
+  setTimeout(() => { el.classList.remove('in'); setTimeout(() => el.remove(), 300); }, 3200);
+}
+ 
+function addPatient() {
+  const name    = document.getElementById('p-name').value.trim();
+  const age     = parseInt(document.getElementById('p-age').value);
+  const disease = document.getElementById('p-disease').value.trim();
+  if (!name)              { showToast('Name is required.', '#c0392b'); return; }
+  if (isNaN(age)||age<0) { showToast('Enter a valid age.', '#c0392b'); return; }
+  if (!disease)           { showToast('Diagnosis is required.', '#c0392b'); return; }
+  const i = patients.length;
+  patients.push({ name, age, disease });
+  document.getElementById('p-name').value    = '';
+  document.getElementById('p-age').value     = '';
+  document.getElementById('p-disease').value = '';
+  log(`<strong>${xe(name)}</strong> registered as patient`, '#1a4a7a');
+  updateCounts();
+  showToast(`${xe(name)} registered — ${pid(i)}`, '#1a4a7a');
+  renderDash();
+}
+ 
+function renderPatients() {
+  const el = document.getElementById('t-patients');
+  if (!patients.length) { el.innerHTML = empty('No patients registered', 'Use Register Patient to add the first record.'); return; }
+  el.innerHTML = tbl(['Patient ID','Name','Age','Diagnosis'],
+    patients.map((p,i) => `<tr>
+      <td><span class="chip chip-mono">${pid(i)}</span></td>
+      <td><strong>${xe(p.name)}</strong></td>
+      <td>${p.age}</td>
+      <td>${xe(p.disease)}</td>
+    </tr>`));
+}
+ 
+function bookAppointment() {
+  const pv   = document.getElementById('a-patient').value;
+  const date = document.getElementById('a-date').value;
+  if (pv==='') { showToast('Select a patient.', '#c0392b'); return; }
+  if (!date)   { showToast('Select a date.', '#c0392b'); return; }
+  appointments.push({ pid:+pv, date });
+  document.getElementById('a-patient').value = '';
+  document.getElementById('a-date').value    = '';
+  log(`Appointment for <strong>${xe(patients[+pv].name)}</strong> on ${fmtDate(date)}`, '#7a5a1a');
+  updateCounts();
+  showToast(`Appointment confirmed — ${xe(patients[+pv].name)}`, '#1d6a3a');
+  renderDash();
+}
+ 
+function renderAppts() {
+  const el = document.getElementById('t-appts');
+  if (!appointments.length) { el.innerHTML = empty('No appointments booked', 'Use Book Appointment to schedule a visit.'); return; }
+  const today = new Date().toISOString().slice(0,10);
+  el.innerHTML = tbl(['#','Patient','Patient ID','Date','Status'],
+    appointments.map((a,i) => {
+      const [label, cls] = a.date<today ? ['Completed','chip-green'] : a.date===today ? ['Today','chip-red'] : ['Upcoming','chip-amber'];
+      return `<tr>
+        <td>${i+1}</td>
+        <td><strong>${xe(patients[a.pid].name)}</strong></td>
+        <td><span class="chip chip-mono">${pid(a.pid)}</span></td>
+        <td>${fmtDate(a.date)}</td>
+        <td><span class="chip ${cls}">${label}</span></td>
+      </tr>`;
+    }));
+}
+ 
+function generateBill() {
+  const pv     = document.getElementById('b-patient').value;
+  const amount = parseFloat(document.getElementById('b-amount').value);
+  if (pv==='')           { showToast('Select a patient.', '#c0392b'); return; }
+  if (isNaN(amount)||amount<=0) { showToast('Enter a valid amount.', '#c0392b'); return; }
+  bills.push({ pid:+pv, amount });
+  document.getElementById('b-patient').value = '';
+  document.getElementById('b-amount').value  = '';
+  log(`Bill of <strong>&#x20B9;${fmt(amount)}</strong> issued to <strong>${xe(patients[+pv].name)}</strong>`, '#c0392b');
+  updateCounts();
+  showToast(`Bill of ₹${fmt(amount)} generated`, '#1d6a3a');
+  renderDash();
+}
+ 
+function renderBills() {
+  const el = document.getElementById('t-bills');
+  if (!bills.length) { el.innerHTML = empty('No bills generated', 'Use Generate Bill to create a record.'); return; }
+  el.innerHTML = tbl(['#','Patient','Patient ID','Amount'],
+    bills.map((b,i) => `<tr>
+      <td>${i+1}</td>
+      <td><strong>${xe(patients[b.pid].name)}</strong></td>
+      <td><span class="chip chip-mono">${pid(b.pid)}</span></td>
+      <td><strong>&#x20B9;${fmt(b.amount)}</strong></td>
+    </tr>`));
+}
+ 
+function renderDash() {
+  document.getElementById('s-patients').textContent = patients.length;
+  document.getElementById('s-appts').textContent    = appointments.length;
+  document.getElementById('s-rev').textContent = '₹' + fmt(bills.reduce((s,b)=>s+b.amount,0));
+ 
+  const rEl = document.getElementById('d-recent');
+  if (!patients.length) {
+    rEl.innerHTML = empty('No patients yet', 'Register your first patient to get started.');
+  } else {
+    rEl.innerHTML = tbl(['ID','Name','Diagnosis'],
+      [...patients].reverse().slice(0,5).map(p => {
+        const i = patients.indexOf(p);
+        return `<tr>
+          <td><span class="chip chip-mono">${pid(i)}</span></td>
+          <td><strong>${xe(p.name)}</strong></td>
+          <td>${xe(p.disease)}</td>
+        </tr>`;
+      }));
+  }
+ 
+  const aEl = document.getElementById('d-activity');
+  if (!activity.length) {
+    aEl.innerHTML = empty('No activity yet', 'Actions will appear here as you work.');
+  } else {
+    aEl.innerHTML = activity.slice().reverse().slice(0,7).map(a => `
+      <div class="feed-item">
+        <div class="feed-dot" style="background:${a.color}"></div>
+        <div class="feed-text">${a.msg}</div>
+        <div class="feed-time">${a.time}</div>
+      </div>`).join('');
+  }
+}
+ 
+function fillSelect(id) {
+  const sel = document.getElementById(id);
+  sel.innerHTML = '<option value="">Select a patient</option>' +
+    (patients.length
+      ? patients.map((p,i) => `<option value="${i}">${pid(i)} — ${xe(p.name)}</option>`).join('')
+      : '<option disabled>No patients registered</option>');
+}
+ 
+function log(msg, color) {
+  const t = new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  activity.push({ msg, color, time: t });
+}
+ 
+function updateCounts() {
+  document.getElementById('nb-p').textContent = patients.length;
+  document.getElementById('nb-a').textContent = appointments.length;
+  document.getElementById('nb-b').textContent = bills.length;
+}
+ 
+function tbl(headers, rows) {
+  return `<table>
+    <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+    <tbody>${rows.join('')}</tbody>
+  </table>`;
+}
+ 
+function empty(title, desc) {
+  return `<div class="empty">
+    <div class="empty-dash"></div>
+    <h3>${title}</h3>
+    <p>${desc}</p>
+  </div>`;
+}
+ 
+function pid(i)  { return 'P-' + String(i).padStart(4,'0'); }
+function fmt(n)  { return n.toLocaleString('en-IN'); }
+function fmtDate(d) {
+  const [y,m,day] = d.split('-');
+  return `${+day} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+m-1]} ${y}`;
+}
+function xe(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+</script>
+</body>
+</html>
